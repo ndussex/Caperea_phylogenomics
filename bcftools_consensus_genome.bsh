@@ -15,7 +15,7 @@ module load bioinfo-tools samtools/1.10 bcftools/1.10 tabix/0.2.6 vcftools/0.1.1
 #copy files from home to tmp directory
 
 vcf_dir='vcf'
-OUT='/Consensus_genomes'
+OUT='Consensus_genomes'
 REF='GCF_002837175.2_ASM283717v2_genomic_headers_fixed.fa'
 cp $vcf_dir/$1.Q30_filtered.AB0208.bcf* ${SNIC_TMP}/
 cp $REF ${SNIC_TMP}/
