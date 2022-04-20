@@ -1,0 +1,59 @@
+#!/bin/bash -l
+#SBATCH -A project_ID
+#SBATCH -p core
+#SBATCH -n 4
+#SBATCH -t 4-00:00:00
+#SBATCH -J make_consensus
+
+#job id: $SLURM_JOB_ID
+#job name (-J): $SLURM_JOB_NAME
+#tmp directory: $SNIC_TMP
+
+module load bioinfo-tools samtools/1.10 bcftools/1.10 tabix/0.2.6 vcftools/0.1.16 htslib/1.3
+
+
+#copy files from home to tmp directory
+
+vcf_dir='vcf'
+OUT='/Consensus_genomes'
+REF='GCF_002837175.2_ASM283717v2_genomic_headers_fixed.fa'
+cp $vcf_dir/$1.Q30_filtered.AB0208.bcf* ${SNIC_TMP}/
+cp $REF ${SNIC_TMP}/
+
+
+###usage
+#cd vcf/
+#for i in $(ls *.Q30_filtered.AB0208.bcf | sed 's/.Q30_filtered.AB0208.bcf//g'|uniq); do sbatch /proj/uppstore2019114/nobackup/scripts/bcftools_consensus.bsh   $i; done
+
+## Move to tmp/ directory
+cd ${SNIC_TMP}
+########
+
+### 0. convert bcf to vcf and compress
+
+bcftools view $1.Q30_filtered.AB0208.bcf -O v -o $1.Q30_filtered.AB0208.vcf
+bgzip $1.Q30_filtered.AB0208.vcf
+tabix -p vcf $1.Q30_filtered.AB0208.vcf.gz
+
+### 1. Generate VCF file of sites that will be masked by “N” in the consensus fasta: 1) sites of DP < 3 and 2) truly polymorphic sites
+#java -jar /sw/apps/bioinfo/GATK/3.4.0/GenomeAnalysisTK.jar -T SelectVariants -R $REF --variant:VCF Sperm.Q30_filtered.AB0208.vcf.gz -select "DP < 5" -o Sperm_lowDP.vcf.gz
+
+java -jar /sw/apps/bioinfo/GATK/3.4.0/GenomeAnalysisTK.jar -T SelectVariants -R $REF --variant:VCF $1.Q30_filtered.AB0208.vcf.gz -select "DP < 5" -o $1_lowDP.vcf.gz
+vcftools --gzvcf $1.Q30_filtered.AB0208.vcf.gz --maf 0.00001 --max-maf 0.99999 --min-alleles 2 --remove-indels --recode --recode-INFO-all --out $1_trueSNPs
+
+
+# 2. Convert VCF files of sites to be masked into tab delimited files of the site positions, concatenate and sort them.
+bgzip -cd $1_lowDP.vcf.gz | grep -v '^#' | awk '{print $1 "\t" $2}' > $1_lowDP.list
+grep -v '^#' $1_trueSNPs.recode.vcf | awk '{print $1 "\t" $2}' > $1_trueSNPs.list
+cat $1_lowDP.list $1_trueSNPs.list | sort -k1,1 -k2,2n -u > $1_lowDP_trueSNPs.list
+
+# Zip and index the vcf file of true SNPs to save space
+bgzip $1_trueSNPs.recode.vcf
+tabix -p vcf $1_trueSNPs.recode.vcf.gz
+
+# Convert consensus .vcf (without indels) to .fasta, masking sites from the list file
+bcftools consensus --mask $1_lowDP_trueSNPs.list --fasta-ref $REF $1.Q30_filtered.AB0208.vcf.gz > $1.consensus.fa
+
+## copy data
+cp ${SNIC_TMP}/*consensus* $OUT
+cp ${SNIC_TMP}/*vcf* $OUT
