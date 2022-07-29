@@ -1,0 +1,67 @@
+#!/bin/bash -l
+#SBATCH -A XXXX
+#SBATCH -p core
+#SBATCH -n 3
+#SBATCH -t 3-00:00:00
+#SBATCH -J PW_PSMC_boot
+
+#job id: $SLURM_JOB_ID
+#job name (-J): $SLURM_JOB_NAME
+#tmp directory: $SNIC_TMP
+
+module load bioinfo-tools
+module load seqtk
+
+INDIR='/my_indir'
+OUTDIR='/my_outdir'
+
+PSMCDIR='/scripts/PSMC/psmc/'
+
+#copy files from home to tmp directory
+cp $INDIR/$1_diploid.fq.gz ${SNIC_TMP}/
+#cp $REFDIR/autosomal_scaffolds.txt ${SNIC_TMP}/
+
+#Usage
+#cd /my_indir
+#for i in $(ls PygmyWhale_diploid.fq.gz | sed 's/_diploid.fq.gz//g'|uniq); do sbatch /scripts/PSMC/PW_PSMC_bootstrap.bsh  $i; done
+
+## Move to tmp/ directory
+cd ${SNIC_TMP}
+########
+
+#remove mtDNA and sex chromosome scaffolds
+#gunzip $1_diploid.fq.gz
+#seqtk subseq $1_diploid.fq autosomal_scaffolds.txt | gzip - > $1_autosomal_diploid.fq.gz
+
+#transform the consensus sequence indicating heterozygotes
+#$PSMCDIR/utils/fq2psmcfa -q30 $1_autosomal_diploid.fq.gz > diploid_$1.psmcfa
+$PSMCDIR/utils/fq2psmcfa -q30 $1_diploid.fq.gz > diploid_$1.psmcfa
+
+#run PSMC normal
+$PSMCDIR/psmc -N25 -t15 -r5 -d -p "4+25*2+4+6" -o $1.psmc diploid_$1.psmcfa
+
+#$PSMCDIR/psmc -N30 -t5 -r5 -d -p "4+30*2+4+6+10" -o $1.psmc diploid_$1.psmcfa
+
+#split long chromosome sequences to shorter segments
+$PSMCDIR/utils/splitfa diploid_$1.psmcfa  > split_$1.psmcfa
+
+#run PSMC bootstrap
+seq 100 | xargs -P 20 -i $PSMCDIR/psmc -N25 -t15 -r5 -b -p "4+25*2+4+6" -o round_$1-{}.psmc split_$1.psmcfa
+
+# concatenate bootstrap runs
+cat $OUTDIR/psmc_files/$1*psmc round_*.psmc > $1_combined.psmc
+
+#make scaled plots
+$PSMCDIR/utils/psmc_plot.pl -p -x 1e3 -g 20 -u 1.38e-08 $1 $1.psmc
+#add bootstraps
+$PSMCDIR/utils/psmc_plot.pl -p -x 1e3 -g 20 -u 1.38e-08 $1_combined $1_combined.psmc
+
+
+cp ${SNIC_TMP}/round*.psmc $OUTDIR/psmc_files/
+cp ${SNIC_TMP}/*.psmc $OUTDIR/psmc_files/
+cp ${SNIC_TMP}/*pdf $OUTDIR/plots
+cp ${SNIC_TMP}/*eps $OUTDIR/plots
+
+
+
+

@@ -1,0 +1,49 @@
+#!/bin/bash -l
+#SBATCH -A XXXX
+#SBATCH -p core
+#SBATCH -n 6
+#SBATCH -t 1-00:00:00
+#SBATCH -J mpileup_consensus_PW
+
+
+#job id: $SLURM_JOB_ID
+#job name (-J): $SLURM_JOB_NAME
+#tmp directory: $SNIC_TMP
+
+module load bioinfo-tools
+module load bcftools/1.6
+module load samtools/1.3
+module load htslib/1.3
+module load vcftools/0.1.15
+
+
+bams='/my_bams'
+REF='/my_ref_dir/GCF_002837175.2_ASM283717v2_genomic_headers_fixed.fa'
+PSMC='/my_outdir'
+
+#copy files from home to tmp directory
+cp $bams/${1}*.merged.rmdup.merged.realn.ba* ${SNIC_TMP}/
+cp $REF ${SNIC_TMP}/
+#Usage
+
+#cd /my_bams
+#for i in $(ls P*.merged.rmdup.merged.realn.bam | sed 's/.merged.rmdup.merged.realn.bam//g'|uniq); do sbatch /scripts/PSMC/mpileup_PW_PSMC.bsh $i;done
+
+
+## Move to tmp/ directory
+cd ${SNIC_TMP}
+## Make index for reference
+########
+
+
+ls -1 *bam > bams
+
+samtools mpileup -f $REF -b bams -g -t DP -B -s -u -Q 30 -q 30 | bcftools call -t 'NC_041214','NC_041215','NC_041216','NC_041217','NC_041218','NC_041219','NC_041220','NC_041221','NC_041222','NC_041223','NC_041224','NC_041225','NC_041226','NC_041227','NC_041228','NC_041229','NC_041230','NC_041231','NC_041232','NC_041233','NC_041234' -c -M -O v  | vcfutils.pl vcf2fq -d 5 -D 100 -Q 30 | gzip > $1_diploid.fq.gz
+
+
+cp ${SNIC_TMP}/*.fq* $PSMC
+
+
+
+
+
