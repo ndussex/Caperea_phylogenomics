@@ -1,3 +1,7 @@
+## This script is used to create a consensus genome from a vcf file 
+## and based on the reference assembly used for mapping.
+###################################################################
+
 #!/bin/bash -l
 #SBATCH -A project_ID
 #SBATCH -p core
@@ -36,8 +40,6 @@ bgzip $1.Q30_filtered.AB0208.vcf
 tabix -p vcf $1.Q30_filtered.AB0208.vcf.gz
 
 ### 1. Generate VCF file of sites that will be masked by “N” in the consensus fasta: 1) sites of DP < 3 and 2) truly polymorphic sites
-#java -jar /sw/apps/bioinfo/GATK/3.4.0/GenomeAnalysisTK.jar -T SelectVariants -R $REF --variant:VCF Sperm.Q30_filtered.AB0208.vcf.gz -select "DP < 5" -o Sperm_lowDP.vcf.gz
-
 java -jar /sw/apps/bioinfo/GATK/3.4.0/GenomeAnalysisTK.jar -T SelectVariants -R $REF --variant:VCF $1.Q30_filtered.AB0208.vcf.gz -select "DP < 5" -o $1_lowDP.vcf.gz
 vcftools --gzvcf $1.Q30_filtered.AB0208.vcf.gz --maf 0.00001 --max-maf 0.99999 --min-alleles 2 --remove-indels --recode --recode-INFO-all --out $1_trueSNPs
 
