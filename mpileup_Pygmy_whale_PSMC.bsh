@@ -1,3 +1,6 @@
+### This script generates fastq files (inpput for the PSMC) from a bam alignment and only retains the autosomal scaffolds
+
+
 #!/bin/bash -l
 #SBATCH -A XXXX
 #SBATCH -p core
@@ -39,7 +42,6 @@ cd ${SNIC_TMP}
 ls -1 *bam > bams
 
 samtools mpileup -f $REF -b bams -g -t DP -B -s -u -Q 30 -q 30 | bcftools call -t 'NC_041214','NC_041215','NC_041216','NC_041217','NC_041218','NC_041219','NC_041220','NC_041221','NC_041222','NC_041223','NC_041224','NC_041225','NC_041226','NC_041227','NC_041228','NC_041229','NC_041230','NC_041231','NC_041232','NC_041233','NC_041234' -c -M -O v  | vcfutils.pl vcf2fq -d 5 -D 100 -Q 30 | gzip > $1_diploid.fq.gz
-
 
 cp ${SNIC_TMP}/*.fq* $PSMC
 
