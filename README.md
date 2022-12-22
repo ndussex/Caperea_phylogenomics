@@ -9,7 +9,7 @@ It is meant to ensure reproducibility and trace analyses in the paper. Please ge
 
 ## Genome consensus building
 
-The [bcftools_consensus_genome.bsh](bcftools_consensus_genome.bsh) uses a bcf file and an assembly to build a new consensus genome
+The [bcftools_consensus_genome.bsh](bcftools_consensus_genome.bsh) script uses a bcf file and an assembly to build a new consensus genome
 
 ## SNP calling
 
