@@ -9,7 +9,7 @@ It is meant to ensure reproducibility and trace analyses in the paper. Please ge
 
 ## Genome consensus building
 
-The [bcftools_consensus_genome.bsh] (bcftools_consensus_genome.bsh) uses a bcf file and an assembly to build a new consensus genome
+The [bcftools_consensus_genome.bsh](bcftools_consensus_genome.bsh) uses a bcf file and an assembly to build a new consensus genome
 
 ## SNP calling
 
@@ -21,4 +21,4 @@ Saved as one file in [build_trees_clean.md](build_trees_clean.md) that includes 
 
 ## PSMC
 
-The [bcftools_consensus_genome.bsh] is used to split a bam file into fastq files which are then used as input in the [Pygmy_whale_PSMC_bootstrap.bsh scripts] to run the PSMC.
+The [bcftools_consensus_genome.bsh](bcftools_consensus_genome.bsh) is used to split a bam file into fastq files which are then used as input in the [Pygmy_whale_PSMC_bootstrap.bsh scripts](Pygmy_whale_PSMC_bootstrap.bsh scripts) to run the PSMC.
