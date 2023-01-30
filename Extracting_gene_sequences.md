@@ -1,6 +1,7 @@
 # Creating Fasta Gene by Gene
 
-This create one file per gene, with all the exons concatenated into one sequence per species with a single N separating exons.
+This file is referred to in the [molecular_dating.md](molecular_dating.md) script
+This creates one file per gene, with all the exons concatenated into one sequence per species with a single N separating exons.
 
 This script is certainly not the most straightforward way of doing it, but it is reproducible.
 
@@ -8,7 +9,7 @@ First, we transform the Sperm whale original annotation into a BED file with onl
 
 ```sh
 awk '$3 == "CDS" {print}' GCF_002837175.2_ASM283717v2_genomic.gff > GCF_002837175.2_ASM283717v2_genomicCDS.gff ## CDS
-convert2bed --input=gff --output=bed  < GCF_002837175.2_ASM283717v2_genomicCDS.gff > GCF_002837175.2_ASM283717v2_genomicCDS.bed #convert to bed is part of Nesi.
+convert2bed --input=gff --output=bed  < GCF_002837175.2_ASM283717v2_genomicCDS.gff > GCF_002837175.2_ASM283717v2_genomicCDS.bed #convert to bed is part of the BEDOPS software.
 
 
 ```
