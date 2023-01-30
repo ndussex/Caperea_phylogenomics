@@ -22,3 +22,7 @@ Saved as one file in [build_trees_clean.md](build_trees_clean.md) that includes 
 ## PSMC
 
 The [bcftools_consensus_genome.bsh](bcftools_consensus_genome.bsh) is used to split a bam file into diplois.fastq file which is then used as input in the [Pygmy_whale_PSMC_bootstrap.bsh](Pygmy_whale_PSMC_bootstrap.bsh) to run the PSMC.
+
+## Molecular dating
+
+The [molecular-dating.md](molecular-dating.md) script contains all the information to repeat the molecular dating analysis.
