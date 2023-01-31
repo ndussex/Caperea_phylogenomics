@@ -2,9 +2,8 @@
 
 ## Step 1: Extract and concatenate exons for each protein coding gene in FASTA format
 
-```
-...
-```
+This is done in the file. [Extracting_gene_sequences.md]( Extracting_gene_sequences.md). This creates one file per gene, with all the exons concatenated into one sequence per species with a single N separating exons.
+
 
 ## Step 2: Create a tree for each gene and filter based on minimum mean bootstrap support
 
